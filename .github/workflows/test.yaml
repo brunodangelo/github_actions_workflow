@@ -52,6 +52,13 @@ jobs:
     needs: build
 
     steps:
+      - name: Connect to AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-session-name: awssyncsession
+          role-to-assume: ${{secrets.AWS_IAM_ROLE}}
+          aws-region: ${{secrets.AWS_REGION}}
+          
       - name: Get current TASK DEFINITION
         run: |
           aws ecs describe-task-definition --task-definition $TASK_DEFINITION_NAME --query taskDefinition > task-definition.json
