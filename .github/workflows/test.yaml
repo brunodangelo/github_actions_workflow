@@ -1,0 +1,64 @@
+name: Unit tests
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  ECR_REPOSITORY: repo_cicd_app
+  TASK_DEFINITION_NAME: app-cicd-td
+  CONTAINER_NAME: app-cicd-container
+  ECS_SERVICE: app-cicd-service
+  ECS_CLUSTER: ecs-cluster-cicd
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Connect to AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-session-name: awssyncsession
+          role-to-assume: ${{secrets.AWS_IAM_ROLE}}
+          aws-region: ${{secrets.AWS_REGION}}
+
+      - name: Login to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      
+      - name: Build docker image
+        id: image-build
+        env:
+          ECR_REGISTRY: ${{steps.ecr.outputs.registry}}
+          IMAGE_TAG: latest
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+      
+      - name: Get current TASK DEFINITION
+        run: |
+          aws ecs describe-task-definition --task-definition $TASK_DEFINITION_NAME --query taskDefinition > task-definition.json
+      
+      - name: Replace image in the TASK DEFINITION
+        id: new-task-definition
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          containter-name: ${{env.CONTAINER_NAME}}
+          image: ${{steps.image-build.outputs.image}}
+      
+      - name: Deploy to ecs
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{steps.new-task-definition.outputs.task-definition}}
+          service: ${{env.ECS_SERVICE}}
+          cluster: ${{env.ECS_CLUSTER}}
