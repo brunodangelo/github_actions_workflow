@@ -32,6 +32,7 @@ jobs:
           role-session-name: awssyncsession
           role-to-assume: ${{secrets.AWS_IAM_ROLE}}
           aws-region: ${{secrets.AWS_REGION}}
+          mask-aws-account-id: 'false'
 
       - name: Login to ECR
         id: ecr
@@ -58,7 +59,7 @@ jobs:
           role-session-name: awssyncsession
           role-to-assume: ${{secrets.AWS_IAM_ROLE}}
           aws-region: ${{secrets.AWS_REGION}}
-          
+
       - name: Get current TASK DEFINITION
         run: |
           aws ecs describe-task-definition --task-definition $TASK_DEFINITION_NAME --query taskDefinition > task-definition.json
