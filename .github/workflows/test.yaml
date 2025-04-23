@@ -1,4 +1,4 @@
-name: Unit tests
+name: ECS Workflow
 
 on:
   push:
@@ -43,6 +43,7 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
       
       - name: Get current TASK DEFINITION
         run: |
