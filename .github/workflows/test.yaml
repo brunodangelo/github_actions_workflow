@@ -21,6 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       image: ${{steps.image-build.outputs.image}}
+      ECR_REGISTRY: ${{steps.ecr.outputs.registry}}
 
     steps:
       - name: Checkout repository
@@ -47,6 +48,7 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "ECR_REGISTRY=$ECR_REGISTRY" >> $GITHUB_OUTPUT
 
   deploy:
     runs-on: ubuntu-latest
