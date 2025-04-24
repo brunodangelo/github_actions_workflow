@@ -29,7 +29,6 @@ jobs:
       - name: Connect to AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          mask-aws-account-id: 'false'
           role-session-name: awssyncsession
           role-to-assume: ${{secrets.AWS_IAM_ROLE}}
           aws-region: ${{secrets.AWS_REGION}}
@@ -42,6 +41,7 @@ jobs:
         id: info
         run: |
           echo "REGISTRY --> ${{steps.ecr.outputs.registry}}"
+          echo ""
 
       - name: Build docker image
         id: image-build
