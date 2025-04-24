@@ -42,7 +42,7 @@ jobs:
       - name: Pass info to next job
         id: pass
         run: |
-          echo "test=hello" >> $GITHUB_OUTPUT
+          echo "test=${{steps.ecr.outputs.registry}}" >> $GITHUB_OUTPUT
       
       - name: Build docker image
         id: image-build
