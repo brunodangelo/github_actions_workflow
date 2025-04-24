@@ -22,6 +22,7 @@ jobs:
     outputs:
       image: ${{steps.image-build.outputs.image}}
       ECR_REGISTRY: ${{steps.ecr.outputs.registry}}
+      IMAGE_TAG: latest
 
     steps:
       - name: Checkout repository
@@ -47,8 +48,9 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
           echo "ECR_REGISTRY=$ECR_REGISTRY" >> $GITHUB_OUTPUT
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
   deploy:
     runs-on: ubuntu-latest
@@ -61,6 +63,12 @@ jobs:
           role-session-name: awssyncsession
           role-to-assume: ${{secrets.AWS_IAM_ROLE}}
           aws-region: ${{secrets.AWS_REGION}}
+
+      - name: Verify variables
+        run: |
+          echo "${{needs.build.outputs.image}}"
+          echo "${{needs.build.outputs.ECR_REGISTRY}}"
+          echo "${{needs.build.outputs.IMAGE_TAG}}"
 
       - name: Get current TASK DEFINITION
         run: |
