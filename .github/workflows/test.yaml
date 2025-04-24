@@ -6,6 +6,7 @@ on:
       - main
 
 env:
+  AWS_REGION: us-east-1
   ECR_REPOSITORY: repo_cicd_app
   TASK_DEFINITION_NAME: app-cicd-td
   CONTAINER_NAME: app-cicd-container
@@ -31,17 +32,11 @@ jobs:
         with:
           role-session-name: awssyncsession
           role-to-assume: ${{secrets.AWS_IAM_ROLE}}
-          aws-region: ${{secrets.AWS_REGION}}
+          aws-region: ${{env.AWS_REGION}}
 
       - name: Login to ECR
         id: ecr
         uses: aws-actions/amazon-ecr-login@v2
-      
-      - name: Verify info
-        id: info
-        run: |
-          echo "REGISTRY --> ${{steps.ecr.outputs.registry}}"
-          echo ""
 
       - name: Build docker image
         id: image-build
@@ -51,7 +46,7 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "image=$ECR_REGISTRY2/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
   deploy:
     runs-on: ubuntu-latest
