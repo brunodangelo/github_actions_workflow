@@ -7,4 +7,8 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'app';
+
+  popup(){
+    alert("Has dado click en el boton!")
+  }
 }
