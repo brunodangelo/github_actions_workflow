@@ -58,7 +58,7 @@ jobs:
         with:
           role-session-name: awssyncsession
           role-to-assume: ${{secrets.AWS_IAM_ROLE}}
-          aws-region: ${{secrets.AWS_REGION}}
+          aws-region: ${{env.AWS_REGION}}
 
       - name: Verify variables
         run: |
