@@ -15,5 +15,4 @@ jobs:
       - name: Verify information
         run: |
           echo "Ejecución del Workflow luego de 'build-deploy.yaml'"
-          echo ${{github.event.client_playload.image}}
-          echo ${{github.event.client_playload.other}}
+          echo ${{github.event.client_payload.image}}
